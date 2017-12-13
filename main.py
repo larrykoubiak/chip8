@@ -14,8 +14,12 @@ def get_image(path):
     return image
 
 
+pygame.mixer.pre_init(22050, -16, 2, 4096)
 pygame.init()
 screen = pygame.display.set_mode((400, 300))
+pygame.mixer.music.load('Hiphop.xm')
+pygame.mixer.music.play(0)
+
 done = False
 is_blue = True
 x = 30
