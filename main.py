@@ -1,5 +1,6 @@
 import pygame
 import os
+from cpu import CPU
 
 _image_library = {}
 
@@ -14,17 +15,19 @@ def get_image(path):
     return image
 
 
-pygame.mixer.pre_init(44100, -16, 2, 4096)
+pygame.mixer.pre_init(44100, -16, 2, 384)
 pygame.init()
 screen = pygame.display.set_mode((400, 300))
-pygame.mixer.music.load('Hiphop.xm')
-pygame.mixer.music.play(0)
+pygame.mixer.music.load('Creep.xm')
+pygame.mixer.music.play(-1)
 
 done = False
 is_blue = True
 x = 30
 y = 30
 
+c = CPU()
+print c
 clock = pygame.time.Clock()
 
 while not done:
