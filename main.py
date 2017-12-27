@@ -14,12 +14,11 @@ def get_image(path):
         _image_library[path] = image
     return image
 
-
-pygame.mixer.pre_init(44100, -16, 2, 1024)
+#pygame.mixer.pre_init(44100, -16, 2, 1024)
 pygame.init()
 screen = pygame.display.set_mode((400, 300))
-pygame.mixer.music.load('Creep.xm')
-pygame.mixer.music.play(-1)
+#pygame.mixer.music.load('Creep.xm')
+#pygame.mixer.music.play(-1)
 
 done = False
 is_blue = True
