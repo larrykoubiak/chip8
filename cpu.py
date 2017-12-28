@@ -2,7 +2,7 @@ import bitfield
 from bitfield import uint16tobytes, bytestouint16
 import binascii
 from random import randint
-import time
+import math
 
 class CPU:
 
@@ -138,6 +138,7 @@ class CPU:
     def run_opcode(self,op):
         if(op.byt.b1 == 0x00):
             if(op.byt.b2 == 0xE0):
+                self.VRAM = bytearray(0x800)
                 return
             elif(op.byt.b2 == 0xEE):
                 self.SP -=1
@@ -241,12 +242,16 @@ class CPU:
         elif(op.nib.n1 == 0xE):
             if(op.byt.b2 == 0x9E):
                 k = self.V[op.nib.n2]
-                if((self.KB & (1 << k) >> k) == 1):
+                m = 1 << k
+                ks = (self.KB & m) >> k
+                if(ks == 1):
                     self.PC += 2
                 return
             elif(op.byt.b2 == 0xA1):
                 k = self.V[op.nib.n2]
-                if((self.KB & (1 << k) >> k) == 0):
+                m = 1 << k
+                ks = (self.KB & m) >> k
+                if(ks == 0):
                     self.PC += 2
                 return
             else:
@@ -256,9 +261,10 @@ class CPU:
                 self.V[op.nib.n2] = self.DT
                 return
             elif(op.byt.b2 == 0x0A):
-                while(self.KB == 0x00):
-                    time.sleep(0.016)
-                self.V[op.nib.n2] = (1 << self.KB) & 0xFF
+                if(self.KB == 0x00):
+                    self.PC -= 2
+                else:
+                    self.V[op.nib.n2] = int(math.log(self.KB, 2))
                 return
             elif(op.byt.b2 == 0x15):
                 self.DT = self.V[op.nib.n2]
@@ -293,7 +299,7 @@ class CPU:
             s = self.RAM[self.I + i]
             org = ((y + i) * 64) + x
             for b in xrange(0,8):
-                pos = org + b
+                pos = (org + b) & 0x7FF
                 pix = (s & (0x80 >> b)) >> (7-b)
                 if pix == 1:
                     if self.VRAM[pos] == 1:
