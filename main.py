@@ -6,11 +6,13 @@ from cpu import CPU
 class Emu:
     def __init__(self):
         pygame.init()
-        self.screen = pygame.display.set_mode((320, 200),HWSURFACE|DOUBLEBUF)
+        pygame.display.set_caption("Chip8 Emulator")
+        self.screen = pygame.display.set_mode((320, 160),HWSURFACE|DOUBLEBUF)
         self.chip8bb = pygame.surface.Surface((64,32))
         self.done = False        
         self.c = CPU()
         self.clock = pygame.time.Clock()
+        self.instructions = {}
 
     def draw(self):
         self.screen.fill((0,0,0))
@@ -20,7 +22,7 @@ class Emu:
                 pos = (y * 64) + x
                 if self.c.VRAM[pos] == 1:
                     self.chip8bb.set_at((x,y),(255,255,255))
-        self.screen.blit(pygame.transform.scale(self.chip8bb,(320,160)),(0,20))
+        self.screen.blit(pygame.transform.scale(self.chip8bb,(320,160)),(0,0))
         pygame.display.flip()
 
     def update(self):
@@ -64,6 +66,8 @@ class Emu:
             self.c.KB = (1 << 0xE)
         elif pressed[pygame.K_v]:
             self.c.KB = (1 << 0xF)
+        if self.c.PC not in self.instructions:
+            self.instructions[self.c.PC] =  self.c.disassemble_addr(self.c.PC)
         o = self.c.read_opcode()
         self.c.run_opcode(o)        
     def mainloop(self,path):
@@ -84,11 +88,14 @@ class Emu:
                 framecounter += 1
             if framecounter >= 60:
                 framecounter = 0
-                print self.clock.get_fps()
 
 if __name__ == "__main__":
     emu = Emu()
     pygame.mixer.pre_init(44100, -16, 2, 1024)
     pygame.mixer.music.load('Creep.xm')
     pygame.mixer.music.play(-1)
-    emu.mainloop('invaders.rom')
+    emu.mainloop('test.ch8')
+    keylist = emu.instructions.keys()
+    keylist.sort()
+    for k in keylist:
+        print "%s" % emu.instructions[k]
