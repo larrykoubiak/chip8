@@ -273,7 +273,8 @@ class CPU:
                 self.ST = self.V[op.nib.n2]
                 return
             elif(op.byt.b2 == 0x1E):
-                self.I = (self.I + self.V[op.nib.n2]) & 0xFFFF
+                val = self.I + self.V[op.nib.n2]
+                self.I = val & 0xFFF
             elif(op.byt.b2 == 0x29):
                 self.I = self.V[op.nib.n2] * 5
             elif(op.byt.b2 == 0x33):
@@ -295,18 +296,21 @@ class CPU:
             return
 
     def draw_sprite(self,x,y,n):
+        self.V[0xF] = 0
         for i in xrange (0,n):
             s = self.RAM[self.I + i]
             org = ((y + i) * 64) + x
             for b in xrange(0,8):
                 pos = (org + b) & 0x7FF
                 pix = (s & (0x80 >> b)) >> (7-b)
-                if pix == 1:
-                    if self.VRAM[pos] == 1:
-                        self.V[0xF] = 1
+                if pix == 1 and self.VRAM[pos] == 1:
+                    self.V[0xF] = 1
                 self.VRAM[pos] ^= pix
         return
 
+    def disassemble_range(self,start,end):
+        for i in xrange(start,end+2,2):
+            print self.disassemble_addr(i)
     def print_ram(self):
         for r in xrange(0,256):
             print "%03X : " % (r*16) + binascii.hexlify(c.RAM[r*16:(r*16)+16]).upper()
