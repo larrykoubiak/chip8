@@ -1,8 +1,8 @@
 from emu import Emu
 
 if __name__ == "__main__":
-    emu = Emu()
-    emu.mainloop('tetris.rom')
+    emu = Emu(key_release=False,scale=15)
+    emu.mainloop('roms/invaders.rom')
     keylist = emu.instructions.keys()
     keylist.sort()
     for k in keylist:

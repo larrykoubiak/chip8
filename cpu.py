@@ -17,7 +17,7 @@ class CPU:
         self.stack = bytearray(0x40)    #STACK
         self.RAM = bytearray(0x1000)    #RAM
         self.VRAM = bytearray(0x800)    #VRAM
-        self.load_file('sysfont.bin',0) #LOAD SYS FONT
+        self.load_file('fonts/sysfont.bin',0) #LOAD SYS FONT
 
     def __str__(self):
         val =  "+------+------+--++" + "--+" * 16 + "\n"
@@ -311,6 +311,7 @@ class CPU:
     def disassemble_range(self,start,end):
         for i in xrange(start,end+2,2):
             print self.disassemble_addr(i)
+
     def print_ram(self):
         for r in xrange(0,256):
             print "%03X : " % (r*16) + binascii.hexlify(c.RAM[r*16:(r*16)+16]).upper()
