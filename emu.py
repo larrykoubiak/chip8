@@ -1,6 +1,7 @@
 import pygame
 from pygame.locals import *
 from cpu import CPU
+from disasm import Disassembler
 from zipfile import ZipFile
 
 class Emu:
@@ -9,6 +10,7 @@ class Emu:
         pygame.init()
         pygame.display.set_caption("Chip8 Emulator")
         self.debug = debug
+        self.disasm = Disassembler()
         self.scale_x = 64 * scale
         self.scale_y = 32 * scale
         self.screen = pygame.display.set_mode((self.scale_x, self.scale_y),HWSURFACE|DOUBLEBUF)
@@ -57,7 +59,7 @@ class Emu:
         #check if opcode is disassembled already
         if self.debug:
             if self.c.PC not in self.instructions:
-                self.instructions[self.c.PC] =  self.c.disassemble_addr(self.c.PC)
+                self.instructions[self.c.PC] =  self.disasm.disassemble_addr(self.c.RAM,self.c.PC)
         o = self.c.read_opcode()
         self.c.run_opcode(o)
 

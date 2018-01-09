@@ -40,3 +40,19 @@ class Opcode(ctypes.Union):
         return result
     def from_bytes(self,b):
         self.int = struct.unpack_from(">H",b)[0]
+    def to_bytes(self):
+        return struct.pack('>H',self.int)
+    def from_b2(self,byts):
+        self.byt.b1 = byts[0]
+        self.byt.b2 = byts[1]
+    def from_n4(self,nibs):
+        self.nib.n1 = nibs[0]
+        self.nib.n2 = nibs[1]
+        self.nib.n3 = nibs[2]
+        self.nib.n4 = nibs[3]
+    def from_n2b(self,n2b):
+        self.nib.n1 = n2b[0]
+        self.nib.n2 = n2b[1]
+        self.byt.b2 = n2b[2]
+    def from_n3n(self,n3n):
+        self.int = (n3n[0] << 12) + n3n[1]

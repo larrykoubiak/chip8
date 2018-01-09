@@ -65,14 +65,14 @@ draw_tetromino:
 
 process_input:
 0x023C: SKNP V7         ; if key_left_pressed
-0x023E: JP 0x0272       ;   goto move_left
+0x023E: CALL 0x0272       ;   goto move_left
 0x0240: SKNP V8         ; if key_right_pressed
-0x0242: JP 0x0284       ;   goto move_right
+0x0242: CALL 0x0284       ;   goto move_right
 0x0244: SKNP V9         ; if key_rotate_pressed
-0x0246: JP 0x0296       ;   goto rotate
+0x0246: CALL 0x0296       ;   goto rotate
 0x0248: SKP V2          ; if !key_down_pressed
 0x024A: JP 0x0250       ;   goto draw_erase
-0x024C: LD V6,00        ; tmp = 0
+0x024C: LD V6,0x00        ; tmp = 0
 0x024E: LD DT,V6        ; DT = tmp
 
 draw_erase:
@@ -135,6 +135,8 @@ rotate:
 0x02B0: CALL 0x0334     ; draw_and_wait()
 0x02B2: RET             ; return
 
+0x02B4: db 0x8000
+
 setup_variables:
 0x02B6: LD V7,0x05      ; key_down = 5
 0x02B8: LD V8,0x06      ; key_right = 6
@@ -142,7 +144,9 @@ setup_variables:
 0x02BC: LD V1,0x1F      ; y = 31
 0x02BE: LD V5,0x10      ; timer = 16
 0x02C0: LD V2,0x07      ; key_drop = 7
-0x02C2: RET
+0x02C2: RET             ; return
+
+0x02C4: inc tetrominoes.bin
 
 draw_and_wait:
 0x0334: DRW V0,V1,4     ; draw x,y,4
@@ -166,7 +170,7 @@ scan_full_line:
 0x0350: CALL 0x035E     ; scan_line()
 0x0352: SNE VB,0x0A     ; if pixel_count == 12
 0x0354: CALL 0x0372     ;   clean_line()
-0x0356: SNE V1,V0       ; if y == x
+0x0356: SNE V1,VC       ; if y == x
 0x0358: RET             ;   return
 0x035A: ADD V1,0x01     ; y += 1
 0x035C: JP 0x0350       ; goto scan_full_line
@@ -217,6 +221,7 @@ no_pixel:
 0x03A4: JP 0x0382       ; goto init_scan
 0x03A6: CALL 0x03C0     ; draw_score()
 0x03A8: SE VF,0x01      ; if !collision
+0x03AA: CALL 0x03C0     ; draw_score()
 0x03AC: ADD VA,0x01     ; score += 1
 update_score:
 0x03AE: CALL 0x03C0     ; draw_score()
@@ -254,3 +259,5 @@ reset_x_score:
 0x03E6: LD VA,0x00      ; score = 0
 0x03E8: LD V0,0x19      ; x = 25
 0x03EA: RET             ; return
+
+0x03EC: SE V7, 0x23     ; ??
