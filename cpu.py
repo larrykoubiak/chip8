@@ -7,17 +7,7 @@ import math
 class CPU:
 
     def __init__(self):
-        self.V = bytearray(0x10)        #REGISTERS
-        self.I = 0x0000                 #ADDRESS REGISTER
-        self.SP = 0x000                 #STACK POINTER
-        self.PC = 0x0200                #PROGRAM COUNTER
-        self.KB = 0x0000                #KEYBOARD STATUS
-        self.DT = 0x00                  #DELAY TIMER
-        self.ST = 0x00                  #SOUND TIMER
-        self.stack = bytearray(0x40)    #STACK
-        self.RAM = bytearray(0x1000)    #RAM
-        self.VRAM = bytearray(0x800)    #VRAM
-        self.load_file('fonts/sysfont.bin',0) #LOAD SYS FONT
+        self.reset()
 
     def __str__(self):
         val =  "+------+------+--++" + "--+" * 16 + "\n"
@@ -30,11 +20,17 @@ class CPU:
         val += "\n" + "+------+------+--++" + "--+" * 16
         return val
 
-    def load_file(self,path,offset):
-        f = open(path,'rb')
-        b = bytearray(f.read())
-        self.RAM[offset:offset+len(b)] = b
-        f.close()
+    def reset(self):
+        self.V = bytearray(0x10)        #REGISTERS
+        self.I = 0x0000                 #ADDRESS REGISTER
+        self.SP = 0x000                 #STACK POINTER
+        self.PC = 0x0200                #PROGRAM COUNTER
+        self.KB = 0x0000                #KEYBOARD STATUS
+        self.DT = 0x00                  #DELAY TIMER
+        self.ST = 0x00                  #SOUND TIMER
+        self.stack = bytearray(0x40)    #STACK
+        self.RAM = bytearray(0x1000)    #RAM
+        self.VRAM = bytearray(0x800)    #VRAM
 
     def read_opcode(self):
         opcode = bitfield.Opcode()

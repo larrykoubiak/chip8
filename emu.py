@@ -1,12 +1,14 @@
 import pygame
 from pygame.locals import *
 from cpu import CPU
+from zipfile import ZipFile
 
 class Emu:
-    def __init__(self,key_release=False,scale=20):
+    def __init__(self,key_release=False,scale=20,debug=False):
         pygame.mixer.pre_init(44100, -16, 1,512)
         pygame.init()
         pygame.display.set_caption("Chip8 Emulator")
+        self.debug = debug
         self.scale_x = 64 * scale
         self.scale_y = 32 * scale
         self.screen = pygame.display.set_mode((self.scale_x, self.scale_y),HWSURFACE|DOUBLEBUF)
@@ -38,11 +40,24 @@ class Emu:
             pygame.K_f, #0xE
             pygame.K_v  #0xF
             ]
-
+        self.load_file('fonts/sysfont.bin',0) #LOAD SYS FONT
+    def load_file(self,path,offset):
+        b= None
+        if(path.endswith(".zip")):
+            zf = ZipFile(path)
+            f = zf.infolist()[0]
+            b = bytearray(zf.read(f))
+            zf.close()
+        else:
+            f = open(path,'rb')
+            b = bytearray(f.read())
+            f.close()
+        self.c.RAM[offset:offset+len(b)] = b
     def run_instruction(self):
         #check if opcode is disassembled already
-        if self.c.PC not in self.instructions:
-            self.instructions[self.c.PC] =  self.c.disassemble_addr(self.c.PC)
+        if self.debug:
+            if self.c.PC not in self.instructions:
+                self.instructions[self.c.PC] =  self.c.disassemble_addr(self.c.PC)
         o = self.c.read_opcode()
         self.c.run_opcode(o)
 
@@ -85,7 +100,7 @@ class Emu:
         self.prev_ST = self.c.ST
 
     def mainloop(self,path):
-        self.c.load_file(path,0x200)
+        self.load_file(path,0x200)
         framecounter = 0
         while not self.done:
             for event in pygame.event.get():
@@ -93,9 +108,17 @@ class Emu:
                     self.done = True
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     self.done = True
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_F1:
+                    self.c.reset()
+                    self.load_file(path,0x200)
             self.check_input()
-            for tickcounter in xrange(0,16):
+            for tickcounter in xrange(0,12): ## 720hz
                 self.run_instruction()
             self.draw()
             self.update_timers()
             self.clock.tick(60)
+        if self.debug:
+            keylist = self.instructions.keys()
+            keylist.sort()
+            for k in keylist:
+                print "%s" % self.instructions[k]
