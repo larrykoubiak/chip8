@@ -189,12 +189,12 @@ class CPU:
             elif(op.byt.b2 == 0x55):
                 for i in xrange(0,op.nib.n2 + 1):
                     self.RAM[self.I+i] = self.V[i]
-                self.I+=1
+                #self.I+=1
                 return
             elif(op.byt.b2 == 0x65):
                 for i in xrange(0,op.nib.n2 + 1):
                     self.V[i] = self.RAM[self.I+i]
-                self.I+=1
+                #self.I+=1
                 return
         else:
             return

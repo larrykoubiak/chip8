@@ -8,7 +8,7 @@ class Assembler:
               "\s*(?P<instr>[A-Zdbwinc]*) " + \
               "(?:(?P<op1>[^, ]*),\s*)?" + \
               "(?:(?P<reg2>[^, ]*),\s*)?" + \
-              "(?:(?P<op2>[^, \\n]*))?\s*" + \
+              "(?:(?P<op2>[^,\\s\\n]*|\\\".*\\\"))?\s*" + \
               "(?:; (?P<comment>.*))?$"
         self.r_line = re.compile(self.strreg)
         self.labels = {}
@@ -93,11 +93,11 @@ class Assembler:
         elif(ins == "SUB"):
             opcode.from_n4((0x8,int(op1[1:],16),int(op2[1:],16),0x5))
         elif(ins == "SHR"):
-            opcode.from_n4((0x8,int(op1[1:],16),0x0,0x6))
+            opcode.from_n4((0x8,int(op2[1:],16),0x0,0x6))
         elif(ins == "SUBN"):
             opcode.from_n4((0x8,int(op1[1:],16),int(op2[1:],16),0x7))
         elif(ins == "SHL"):
-            opcode.from_n4((0x8,int(op1[1:],16),0x0,0xE))
+            opcode.from_n4((0x8,int(op2[1:],16),0x0,0xE))
         elif(ins == "RND"):
             opcode.from_n2b((0xC,int(op1[1:],16),int(op2,16)))
         elif(ins == "DRW"):
@@ -113,14 +113,19 @@ class Assembler:
             self.position +=2
         else:
             if(ins == "dw"):
-                self.buffer[self.position:self.position+1] =int(op2,16)
-                self.position +=1
-            elif(ins == "db"):
-                self.buffer[self.position:self.position+2] = bitfield.uint16tobytes(int(op2,16))
+                self.buffer[self.position:self.position+2] =bitfield.uint16tobytes(int(op2,16))
                 self.position +=2
+            elif(ins == "db"):
+                if(op2[0]=='"' and op2[-1]=='"'): #string mode
+                    b = bytearray(op2[1:-1])
+                    self.buffer[self.position:self.position+len(b)] = b
+                    self.position += len(b)
+                else:
+                    self.buffer[self.position] = int(op2,16)
+                    self.position +=1
             elif(ins == "inc"):
-                print "%04X" % self.position
-                b = self.loadfilebytes(os.path.join(self.cwd,op2))
+                p = self.cwd+'/' +op2
+                b = self.loadfilebytes(p)
                 self.buffer[self.position:self.position+len(b)] = b
                 self.position += len(b)
 
@@ -129,8 +134,8 @@ class Assembler:
         strresult=""
         o = None
         if m is not None:
-            self.assemble_tokens(m.groupdict())
             print "0x%04X: %s" % (self.position,strline) 
+            self.assemble_tokens(m.groupdict())
 
     def assemble_file(self,srcpath,destpath=""):
         self.position = 0
@@ -149,4 +154,4 @@ class Assembler:
 
 if __name__ == "__main__":
     a = Assembler()
-    a.assemble_file("src/tetris.s","roms/tetris.ch8")
+    a.assemble_file("src/test.s","roms/test2.ch8")
